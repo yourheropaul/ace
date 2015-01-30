@@ -25,7 +25,7 @@ func Compile(c *s.C, data interface{}) s.Job {
 		for file := range in {
 
 			buf := new(bytes.Buffer)
-			_, err := buf.ReadFrom(file.Content)
+			_, err := buf.ReadFrom(file.Reader)
 			file.Close()
 			if err != nil {
 				c.Println(err)
@@ -54,7 +54,7 @@ func Compile(c *s.C, data interface{}) s.Job {
 				break
 			}
 
-			file.Content = template.NewTemplateReadCloser(c, wg, t, data)
+			file.Reader = template.NewTemplateReadCloser(c, wg, t, data)
 			out <- file
 		}
 	}

@@ -8,13 +8,13 @@ import (
 	html "html/template"
 	"sync"
 
-	"github.com/omeid/slurp/s"
-	"github.com/omeid/slurp/template"
+	"github.com/omeid/slurp"
+	"github.com/omeid/slurp/stages/template"
 	"github.com/yosssi/ace"
 )
 
-func Compile(c *s.C, data interface{}) s.Job {
-	return func(in <-chan s.File, out chan<- s.File) {
+func Compile(c *slurp.C, data interface{}) slurp.Job {
+	return func(in <-chan slurp.File, out chan<- slurp.File) {
 
 		options := ace.Options{}
 		fs := []*ace.File{}

@@ -6,6 +6,7 @@ package ace
 import (
 	"bytes"
 	html "html/template"
+	"strings"
 	"sync"
 
 	"github.com/omeid/slurp"
@@ -13,10 +14,13 @@ import (
 	"github.com/yosssi/ace"
 )
 
-func Compile(c *slurp.C, data interface{}) slurp.Job {
+type Options ace.Options
+
+func Compile(c *slurp.C, options Options, data interface{}) slurp.Job {
 	return func(in <-chan slurp.File, out chan<- slurp.File) {
 
-		options := ace.Options{}
+		options := ace.Options(options)
+
 		fs := []*ace.File{}
 
 		var wg sync.WaitGroup
@@ -53,6 +57,13 @@ func Compile(c *slurp.C, data interface{}) slurp.Job {
 				c.Println(err)
 				break
 			}
+
+			path := strings.TrimSuffix(file.Path, ".ace") + ".html"
+
+			stat := slurp.FileInfoFrom(file.Stat)
+
+			stat.SetName(path)
+			file.Path = path
 
 			file.Reader = template.NewTemplateReadCloser(c, wg, t, data)
 			out <- file

@@ -16,7 +16,7 @@ import (
 
 type Options ace.Options
 
-func Compile(c *slurp.C, options Options, data interface{}) slurp.Job {
+func Compile(c *slurp.C, options Options, data interface{}) slurp.Stage {
 	return func(in <-chan slurp.File, out chan<- slurp.File) {
 
 		options := ace.Options(options)

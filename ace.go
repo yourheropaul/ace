@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	"github.com/omeid/slurp"
-	"github.com/omeid/slurp/stages/template"
 	"github.com/yosssi/ace"
 )
 
@@ -33,10 +32,16 @@ func Compile(c *slurp.C, options Options, data interface{}) slurp.Stage {
 			file.Close()
 			if err != nil {
 				c.Println(err)
-				break
+				continue
 			}
 
-			name := file.Stat.Name() //Probably filepath.Rel(file.Dir, file.Path) ??
+			s, err := file.Stat()
+			if err != nil {
+			  c.Println(err)
+			  break
+			}
+
+			name := s.Name() //Probably filepath.Rel(file.Dir, file.Path) ??
 			f := ace.NewFile(name, buf.Bytes())
 			source := ace.NewSource(
 				ace.NewFile("", nil),
@@ -49,23 +54,33 @@ func Compile(c *slurp.C, options Options, data interface{}) slurp.Stage {
 			r, err := ace.ParseSource(source, &options)
 			if err != nil {
 				c.Println(err)
-				break
+				continue
 			}
 
 			t, err := ace.CompileResultWithTemplate(html.New(name), r, &options)
 			if err != nil {
 				c.Println(err)
-				break
+				continue
 			}
 
+			buf = new(bytes.Buffer)
+			err = t.Execute(buf, data)
+			if err != nil {
+				c.Println(err)
+				continue
+			}
+
+			file.Reader = buf
 			path := strings.TrimSuffix(file.Path, ".ace") + ".html"
 
-			stat := slurp.FileInfoFrom(file.Stat)
-
-			stat.SetName(path)
 			file.Path = path
 
-			file.Reader = template.NewTemplateReadCloser(c, wg, t, data)
+			stat := slurp.FileInfoFrom(s)
+			stat.SetName(path)
+			stat.SetSize(int64(buf.Len()))
+
+			file.SetStat(stat)
+
 			out <- file
 		}
 	}

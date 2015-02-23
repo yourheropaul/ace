@@ -31,13 +31,13 @@ func Compile(c *slurp.C, options Options, data interface{}) slurp.Stage {
 			_, err := buf.ReadFrom(file.Reader)
 			file.Close()
 			if err != nil {
-				c.Println(err)
+				c.Error(err)
 				continue
 			}
 
 			s, err := file.Stat()
 			if err != nil {
-			  c.Println(err)
+			  c.Error(err)
 			  break
 			}
 
@@ -53,20 +53,20 @@ func Compile(c *slurp.C, options Options, data interface{}) slurp.Stage {
 
 			r, err := ace.ParseSource(source, &options)
 			if err != nil {
-				c.Println(err)
+				c.Error(err)
 				continue
 			}
 
 			t, err := ace.CompileResultWithTemplate(html.New(name), r, &options)
 			if err != nil {
-				c.Println(err)
+				c.Error(err)
 				continue
 			}
 
 			buf = new(bytes.Buffer)
 			err = t.Execute(buf, data)
 			if err != nil {
-				c.Println(err)
+				c.Error(err)
 				continue
 			}
 

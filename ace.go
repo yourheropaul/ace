@@ -6,10 +6,11 @@ package ace
 import (
 	"bytes"
 	html "html/template"
-	"strings"
 	"sync"
 
 	"github.com/omeid/slurp"
+	"github.com/omeid/slurp/tools/path"
+
 	"github.com/yosssi/ace"
 )
 
@@ -71,17 +72,19 @@ func Compile(c *slurp.C, options Options, data interface{}) slurp.Stage {
 			}
 
 			file.Reader = buf
-			path := strings.TrimSuffix(file.Path, ".ace") + ".html"
-
-			file.Path = path
 
 			stat := slurp.FileInfoFrom(s)
-			stat.SetName(path)
 			stat.SetSize(int64(buf.Len()))
-
 			file.SetStat(stat)
 
+			file, err = path.ReplaceExt(file, ".ace", ".html")
+			if err != nil {
+			  c.Error(err)
+			  continue
+			}
+
 			out <- file
+
 		}
 	}
 }

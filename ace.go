@@ -72,10 +72,7 @@ func Compile(c *slurp.C, options Options, data interface{}) slurp.Stage {
 			}
 
 			file.Reader = buf
-
-			stat := slurp.FileInfoFrom(s)
-			stat.SetSize(int64(buf.Len()))
-			file.SetStat(stat)
+			file.FileInfo.SetSize(int64(buf.Len()))
 
 			file, err = path.ReplaceExt(file, ".ace", ".html")
 			if err != nil {

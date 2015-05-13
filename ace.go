@@ -6,6 +6,7 @@ package ace
 import (
 	"bytes"
 	html "html/template"
+	"path/filepath"
 	"sync"
 
 	"github.com/omeid/slurp"
@@ -28,6 +29,11 @@ func Compile(c *slurp.C, options Options, data interface{}) slurp.Stage {
 
 		for file := range in {
 
+			if filepath.Ext(file.FileInfo.Name()) == ".html" {
+				out <- file
+				continue
+			}
+
 			buf := new(bytes.Buffer)
 			_, err := buf.ReadFrom(file.Reader)
 			file.Close()
@@ -38,8 +44,8 @@ func Compile(c *slurp.C, options Options, data interface{}) slurp.Stage {
 
 			s, err := file.Stat()
 			if err != nil {
-			  c.Error(err)
-			  break
+				c.Error(err)
+				break
 			}
 
 			name := s.Name() //Probably filepath.Rel(file.Dir, file.Path) ??
@@ -76,8 +82,8 @@ func Compile(c *slurp.C, options Options, data interface{}) slurp.Stage {
 
 			file, err = path.ReplaceExt(file, ".ace", ".html")
 			if err != nil {
-			  c.Error(err)
-			  continue
+				c.Error(err)
+				continue
 			}
 
 			out <- file
